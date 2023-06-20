@@ -543,9 +543,9 @@ function set_random_stash(no_spot, hint, bonus_items, id, dbg)
 			local kind = kind_list[i]
 			
 			-- No multi toolkits if its a rare stash
-			if (kind == "i_kit") and is_rare then
-				kind = "na"
-			end
+			-- if (kind == "i_kit") and is_rare then
+			-- 	kind = "na"
+			-- end
 			
             -- Rotate through shuffled tiers
             --shuffle_table(tier_list) -- Grok's Stash Overhaul, removes shuffle_table on tiers to keep the tiers from the map tier system
@@ -604,6 +604,31 @@ function set_random_stash(no_spot, hint, bonus_items, id, dbg)
 	else
 		if (#content > 0) then
 		
+			--Remove duplicates of itm_basickit, itm_drugkit, itm_ammokit from stash if is_rare
+			if is_rare then
+				
+				--Enumerate the items in content and count them
+				local item_count = {}
+				for i=1,#content do
+					local itm = content[i]
+					item_count[itm] = item_count[itm] and (item_count[itm] + 1) or 1
+				end
+
+				-- Now check if there are duplicates of itm_basickit, itm_drugkit, itm_ammokit from the item_count table and remove them from content if there are more than 1 of them in item_count
+				for k,v in pairs(item_count) do
+					if (k == "itm_basickit" or k == "itm_drugkit" or k == "itm_ammokit") and v > 1 then
+						for i=1,v-1 do
+							for j=1,#content do
+								if content[j] == k then
+									table.remove(content,j)
+									break
+								end
+							end
+						end
+					end
+				end
+			end			
+
 			local spot
 			if no_spot and (type(no_spot) == "string") then
 				spot = no_spot
